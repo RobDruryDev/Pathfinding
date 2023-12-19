@@ -17,32 +17,26 @@ public:
         x = static_cast<T>(other.x);
         y = static_cast<T>(other.y);
     }
+
+    Vector2(const Vector2<T>& other)
+    {
+        x = other.x;
+        y = other.y;
+    }
+
+
+    friend Vector2<T> operator+(const Vector2<T>& lhs, T rhs) { return Vector2<T>(); }
+    friend Vector2<T> operator+(T rhs, const Vector2<T>& lhs) { return Vector2<T>(); }
+
+    friend Vector2<T> operator+(const Vector2<T>& lhs, const Vector2<T>& rhs) { return Vector2<T>(lhs.x + rhs.x, lhs.y + rhs.y); }
+    friend Vector2<T> operator+(const Vector2<T>&& lhs, const Vector2<T>&& rhs) { return Vector2<T>(lhs.x + rhs.x, lhs.y + rhs); }
+    friend Vector2<T> operator-(const Vector2<T>& lhs, const Vector2<T>& rhs) { return Vector2<T>(lhs.x - rhs, lhs.y - rhs); }
+    friend Vector2<T> operator-(const Vector2<T>&& lhs, const Vector2<T>&& rhs) { return Vector2<T>(lhs.x - rhs, lhs.y - rhs); }
+    friend Vector2<T> operator*(const Vector2<T>& lhs, const T rhs) { return Vector2<T>(lhs.x * rhs, lhs.y * rhs); }
+    friend Vector2<T> operator*(const Vector2<T>&& lhs, const T rhs) { return Vector2<T>(lhs.x * rhs, lhs.y * rhs); }
+    friend Vector2<T> operator/(const Vector2<T>& lhs, const T rhs) { return Vector2<T>(lhs.x / rhs, lhs.y / rhs); }
+    friend Vector2<T> operator/(const Vector2<T>&& lhs, const T rhs) { return Vector2<T>(lhs.x / rhs, lhs.y / rhs); }
 };
-
-
-template<typename T>
-inline Vector2<T> operator+(const Vector2<T>& lhs, const Vector2<T>& rhs) { return { lhs.x + rhs.x, lhs.y + rhs }; }
-
-template<typename T>
-inline Vector2<T> operator+(const Vector2<T>&& lhs, const Vector2<T>& rhs) { return { lhs.x + rhs.x, lhs.y + rhs }; }
-
-template<typename T>
-inline Vector2<T> operator-(const Vector2<T>& lhs, const Vector2<T>& rhs) { return { lhs.x - rhs, lhs.y - rhs }; }
-
-template<typename T>
-inline Vector2<T> operator-(const Vector2<T>&& lhs, const Vector2<T>& rhs) { return { lhs.x - rhs, lhs.y - rhs }; }
-
-template<typename T>
-inline Vector2<T> operator*(const Vector2<T>& lhs, const T rhs) { return { lhs.x * rhs, lhs.y * rhs }; }
-
-template<typename T>
-inline Vector2<T> operator*(const Vector2<T>&& lhs, const T rhs) { return { lhs.x * rhs, lhs.y * rhs }; }
-
-template<typename T>
-inline Vector2<T> operator/(const Vector2<T>& lhs, const T rhs) { return { lhs.x / rhs, lhs.y / rhs }; }
-
-template<typename T>
-inline Vector2<T> operator/(const Vector2<T>&& lhs, const T rhs) { return { lhs.x / rhs, lhs.y / rhs }; }
 
 template<typename T>
 inline void operator+=(const Vector2<T>& lhs, const Vector2<T>& rhs) { lhs.x += rhs; lhs.y += rhs; }
@@ -67,7 +61,7 @@ template<typename T>
 inline bool operator== (const Vector2<T>& lhs, const Vector2<T>&& rhs)
 {
     return lhs.x - rhs.x <= std::numeric_limits<T>::epsilon() &&
-        lhs.y - rhs.y <= std::numeric_limits<T>::epsilon();
+           lhs.y - rhs.y <= std::numeric_limits<T>::epsilon();
 }
 
 template<typename T>

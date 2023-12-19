@@ -32,14 +32,16 @@ public:
     T& GetData(int x, int y) { assert(IsValid(x, y)); return _data[x + y * _width]; }
 
     template<class vecT>
-    void SetData(const Vector2<vecT>& pos, T&& data) { SetData(pos.x, pos.y, data); }
+    void SetData(const Vector2<vecT>& pos, T& data) { SetData(pos.x, pos.y, data); }
 
     template<class vecT>
     void SetData(const Vector2<vecT>&& pos, T&& data) { SetData(pos.x, pos.y, data); }
 
+    void SetData(int x, int y, T& data) { assert(IsValid(x, y)); _data[x + y * _width] = data; }
+
     void SetData(int x, int y, T&& data) { assert(IsValid(x, y)); _data[x + y * _width] = data; }
 
-private:
+protected:
     int _width;
     int _height;
 

@@ -9,7 +9,7 @@
 #include <math.h>
 #include <set>
 
-#include "Grid.h"
+#include "Maze.h"
 #include "AStar.h"
 
 using namespace std;
@@ -30,47 +30,19 @@ static void ToLower(string& in)
     }
 }
 
-constexpr int GRID_WIDTH = 4;
-constexpr int GRID_HEIGHT = 4;
-void RenderRow(bool forceRowBottom)
-{
-    for (int i = 0; i < GRID_WIDTH; i++)
-    {
-        cout << " --- ";
-    }
-
-    cout << "\n";
-
-    for (int i = 0; i < GRID_WIDTH; i++)
-    {
-        cout << "|   |";
-    }
-
-    cout << "\n";
-
-    for (int i = 0; forceRowBottom && i < GRID_WIDTH; i++)
-    {
-        cout << " --- ";
-    }
-}
-
-void RenderGrid()
-{
-    for (int i = 0; i < GRID_HEIGHT; i++)
-    {
-        RenderRow(GRID_HEIGHT - i == 1);
-    }
-}
+constexpr int GRID_WIDTH = 32;
+constexpr int GRID_HEIGHT = 32;
 
 int main()
 {
     static string input; 
-    static shared_ptr<Grid<uint8_t>> grid(new Grid<uint8_t>(GRID_WIDTH, GRID_HEIGHT));
-    static unique_ptr<AStar> pathfinder(new AStar(grid));
+    static shared_ptr<Maze> grid(new Maze(GRID_WIDTH, GRID_HEIGHT));
+    grid->Generate();
+    /*static unique_ptr<AStar> pathfinder(new AStar(grid));*/
 
     while (ExitCommands.find(input) == ExitCommands.end())
     {
-        RenderGrid();
+        grid->RenderGrid();
         cin >> input;
         ToLower(input);
     }
