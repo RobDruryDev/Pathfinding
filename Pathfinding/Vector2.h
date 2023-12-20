@@ -51,7 +51,7 @@ template<class T>
 inline Vector2<T> operator/(const Vector2<T>&& lhs, const T rhs) { return Vector2<T>(lhs.x / rhs, lhs.y / rhs); }
 
 template<class T>
-inline Vector2<T>& operator+=(Vector2<T>& lhs, const Vector2<T>& rhs) { lhs.x += rhs.y; lhs.y += rhs.x; return lhs; }
+inline Vector2<T>& operator+=(Vector2<T>& lhs, const Vector2<T>& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
 
 template<class T>
 inline Vector2<T>& operator-=(Vector2<T>& lhs, const Vector2<T>& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }

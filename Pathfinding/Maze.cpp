@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_set>
 #include <iostream>
+#include <Windows.h>
+#include <stdio.h>
 
 #define SHUFFLE(ARR, LEN)	  \
 for (int i = 0; i < LEN; i++) \
@@ -24,17 +26,19 @@ CONTAINER.pop_back();							  \
 #define TO_IDX(VEC) VEC.x + VEC.y * _width
 #define TO_VEC(IDX) Vector2I(IDX % _width, IDX / _width)
 
+static _STD stack<_STD pair<int, int>> debug_path;
+static Vector2I neighbors[4]
+{
+	Vector2I(-1, 0),
+	Vector2I(0, -1),
+	Vector2I(1, 0),
+	Vector2I(0, 1),
+};
+
 void Maze::Generate()
 {
 	_STD fill(_data.begin(), _data.end(), Maze::CLOSED_CELL);
 	static int indices[4] = { 0, 1, 2, 3 };
-	static Vector2I neighbors[4]
-	{
-		Vector2I(-1, 0),
-		Vector2I(0, -1),
-		Vector2I(1, 0),
-		Vector2I(0, 1),
-	};
 
 	srand((unsigned)time(0));
 	static _STD vector<int> open_set;
@@ -87,7 +91,9 @@ void Maze::Generate()
 		while (!path.empty())
 		{
 			int wall_id = path.top();
-			uint8_t data = GetData(TO_VEC(current)) & ~(1 << ((wall_id - 2) % 4));
+			debug_path.emplace(_STD make_pair(current, wall_id));
+
+			uint8_t data = GetData(TO_VEC(current)) & ~(1 << (wall_id + 2 % 4));
 			SetData(TO_VEC(current), data);
 
 			current = TO_IDX((TO_VEC(current) - neighbors[path.top()]));
@@ -110,20 +116,24 @@ void Maze::RenderRow(int row, bool forceBottom)
 {
 	for (int i = 0; i < _width; i++)
 	{
+		if (i == 0) _STD cout << " ";
 		if ((GetData(i, row) & Maze::TOP_WALL) == Maze::TOP_WALL)
-			_STD cout << " --- ";
+			_STD cout << "--- ";
 		else
-			_STD cout << "     ";
+			_STD cout << "    ";
 	}
 
 	_STD cout << "\n";
 
 	for (int i = 0; i < _width; i++)
 	{
-		if ((GetData(i, row) & Maze::LEFT_WALL) == Maze::LEFT_WALL)
-			_STD cout << "|";
-		else
-			_STD cout << " ";
+		if (i == 0)
+		{
+			if ((GetData(i, row) & Maze::LEFT_WALL) == Maze::LEFT_WALL)
+				_STD cout << "|";
+			else
+				_STD cout << " ";
+		}
 
 		_STD cout << "   ";
 
@@ -137,17 +147,55 @@ void Maze::RenderRow(int row, bool forceBottom)
 
 	for (int i = 0; forceBottom && i < _width; i++)
 	{
+		if (i == 0) _STD cout << " ";
 		if ((GetData(i, row) & Maze::BOTTOM_WALL) == Maze::BOTTOM_WALL)
-			_STD cout << " --- ";
+			_STD cout << "--- ";
 		else
-			_STD cout << "     ";
+			_STD cout << "    ";
 	}
 }
 
+static Vector2I cell_size(4, 2);
+static COORD ToConsolePos(int x, int y, int height)
+{
+	return { (short)(cell_size.x / 2 + cell_size.x * x),
+			 (short)max(cell_size.y / 2, cell_size.y * (height - y) - cell_size.y / 2) };
+}
+
+static void SetCursorPos(COORD&& pos)
+{
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
+
+static void RenderChar(COORD&& pos, char c)
+{
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+	_STD cout << c;
+}
+
+
 void Maze::RenderGrid()
 {
-	for (int i = 0; i < _height; i++)
+	for (int i = _height - 1; i >= 0; i--)
 	{
-		RenderRow(i, _height - i == 1);
+		RenderRow(i, i == 0);
 	}
+
+	//auto current_cell = debug_path.top();
+	//RenderChar(ToConsolePos(current_cell.first % _width, current_cell.first / _width, _height), 'o');
+	//debug_path.pop();
+
+	//while (debug_path.size() > 1)
+	//{
+	//	/*current_cell = debug_path.top();
+	//	RenderChar(ToConsolePos(current_cell.first % _width, current_cell.first / _width, _height), 
+	//			   current_cell.second % 2 == 1 ? '|' : '-');*/
+	//	debug_path.pop();
+	//}
+
+	//current_cell = debug_path.top();
+	//RenderChar(ToConsolePos(current_cell.first % _width, current_cell.first / _width, _height), 'x');
+	//debug_path.pop();
+
+	//SetCursorPos({ 0, 0 });
 }

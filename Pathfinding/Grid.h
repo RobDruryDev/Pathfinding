@@ -21,7 +21,7 @@ public:
     template<class vecT>
     bool IsValid(const Vector2<vecT>&& pos) const { return IsValid(pos.x, pos.y); }
 
-    bool IsValid(int x, int y) const { return x >= 0 && y >= 0 && x + y * _width < _data.size(); }
+    bool IsValid(int x, int y) const { return x >= 0 && y >= 0 && x < _width && y < _height; }
 
     template<class vecT>
     const T& GetData(const Vector2<vecT>& pos) { return GetData(pos.x, pos.y); }
