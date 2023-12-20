@@ -32,5 +32,10 @@
 **/*.app
 **/*.pdb
 
+#Proj Files 
+#**/*.vcxproj
+**/*.vcxproj*
+
+# Folders
 **/Debug/**
 .vs/

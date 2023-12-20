@@ -30,8 +30,8 @@ static void ToLower(string& in)
     }
 }
 
-constexpr int GRID_WIDTH = 32;
-constexpr int GRID_HEIGHT = 32;
+constexpr int GRID_WIDTH = 6;
+constexpr int GRID_HEIGHT = 6;
 
 int main()
 {
