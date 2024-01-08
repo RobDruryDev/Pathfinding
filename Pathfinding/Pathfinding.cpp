@@ -2,6 +2,8 @@
 //
 
 #include <set>
+#include <iostream>
+#include <string>
 
 #include "ConsoleUtil.h"
 #include "Maze.h"
