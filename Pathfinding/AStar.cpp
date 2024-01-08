@@ -1,7 +1,7 @@
 
 #include<queue>
 #include "AStar.h"
-#include "Grid.h"
+#include "Maze.h"
 
 float AStar::CalculateHeuristic(const AStarNode& node, const AStarNode& dest) const
 {
@@ -13,10 +13,10 @@ Path AStar::BuildPath(const Vector2F& start, const Vector2F& dest, const vector<
     deque<Vector2F> pathQueue;
     pathQueue.emplace_front(dest);
 
-    AStarNode current = nodes[dest.x + dest.y * _grid->GetWidth()];
+    AStarNode current = nodes[dest.x + dest.y * _maze->GetWidth()];
     while (current.pos != current.parentPos)
     {
-        current = nodes[current.parentPos.x + current.parentPos.y * _grid->GetWidth()];
+        current = nodes[current.parentPos.x + current.parentPos.y * _maze->GetWidth()];
         pathQueue.emplace_front(current.pos);
     }
     
@@ -26,20 +26,20 @@ Path AStar::BuildPath(const Vector2F& start, const Vector2F& dest, const vector<
 
 Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
 {
-    if (!_grid->IsValid(startPos) || !_grid->IsValid(destPos) || startPos == destPos)
+    if (!_maze->IsValid(startPos) || !_maze->IsValid(destPos) || startPos == destPos)
     {
         return {};
     }
 
-    vector<AStarNode> nodes(_grid->GetSize());
+    vector<AStarNode> nodes(_maze->GetSize());
     std::fill(nodes.begin(), nodes.end() - 1, AStarNode::Default());
 
-    vector<bool> closedSet;
+    vector<bool> closedSet(_maze->GetSize());
     priority_queue<AStarNode> openSet;
     std::fill(closedSet.begin(), closedSet.end() - 1, false);
 
-    AStarNode& dest = nodes[destPos.x + destPos.y * _grid->GetWidth()];
-    AStarNode& start = nodes[startPos.x + startPos.y * _grid->GetWidth()];
+    AStarNode& dest = nodes[destPos.x + destPos.y * _maze->GetWidth()];
+    AStarNode& start = nodes[startPos.x + startPos.y * _maze->GetWidth()];
     start = { 0, 0, startPos, startPos};
 
     openSet.push(start);
@@ -48,7 +48,7 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
         const AStarNode& current = openSet.top();
         openSet.pop();
 
-        closedSet[current.pos.x + current.pos.y * _grid->GetWidth()] = true;
+        closedSet[current.pos.x + current.pos.y * _maze->GetWidth()] = true;
 
         for (int i = -1; i <= 1; i++)
         {
@@ -61,10 +61,10 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
                     continue;
 
                 Vector2I nextPos(current.pos.x + j, current.pos.y + i);
-                if (_grid->GetData(nextPos) == 1 || closedSet[nextPos.x + nextPos.y * _grid->GetWidth()])
+                if (_maze->IsBlocked(current.pos, nextPos) || closedSet[nextPos.x + nextPos.y * _maze->GetWidth()])
                     continue;
 
-                AStarNode& neighbor = nodes[nextPos.x + nextPos.y * _grid->GetWidth()];
+                AStarNode& neighbor = nodes[nextPos.x + nextPos.y * _maze->GetWidth()];
                 if (dest.pos == nextPos)
                 {
                     neighbor.parentPos = current.pos;

@@ -7,13 +7,13 @@
 
 using namespace std;
 
-template<class GridT> class Grid;
+class Maze;
 typedef vector<Vector2F> Path;
 
 class AStar
 {
 public:
-    AStar(shared_ptr<Grid<uint8_t>> g) { _grid = g; }
+    AStar(shared_ptr<Maze> m) { _maze = m; }
 
 private:
 
@@ -38,7 +38,7 @@ private:
         }
     };
 
-    shared_ptr<Grid<uint8_t>> _grid;
+    shared_ptr<Maze> _maze;
 
     float CalculateHeuristic(const AStarNode& node, const AStarNode& dest) const;
     Path BuildPath(const Vector2F& start, const Vector2F& dest, const vector<AStarNode>& nodes) const;

@@ -1,12 +1,16 @@
 #pragma once
 
-#include <cmath>
 #include <limits>
 
 template<class T>
 class Vector2
 {
 public: 
+    static const Vector2<T> Zero() { static const Vector2<T> v(0, 0); return v; }
+    static const Vector2<T> One() { static const Vector2<T> v(1, 1); return v; }
+    static const Vector2<T> Right() { static const Vector2<T> v(1, 0); return v; }
+    static const Vector2<T> Up() { static const Vector2<T> v(0, 1); return v; }
+
     T x, y;
     
     Vector2<T>() {};
@@ -65,15 +69,15 @@ inline Vector2<T>& operator/=(Vector2<T>& lhs, const T rhs) { lhs.x /= rhs; lhs.
 template<class T>
 inline bool operator== (const Vector2<T>& lhs, const Vector2<T>& rhs)
 {
-    return lhs.x - rhs.x <= std::numeric_limits<T>::epsilon() &&
-           lhs.y - rhs.y <= std::numeric_limits<T>::epsilon();
+    return abs(lhs.x - rhs.x) <= std::numeric_limits<T>::epsilon() &&
+           abs(lhs.y - rhs.y) <= std::numeric_limits<T>::epsilon();
 }
 
 template<class T>
 inline bool operator== (const Vector2<T>& lhs, const Vector2<T>&& rhs)
 {
-    return lhs.x - rhs.x <= std::numeric_limits<T>::epsilon() &&
-           lhs.y - rhs.y <= std::numeric_limits<T>::epsilon();
+    return abs(lhs.x - rhs.x) <= std::numeric_limits<T>::epsilon() &&
+           abs(lhs.y - rhs.y) <= std::numeric_limits<T>::epsilon();
 }
 
 template<class T>

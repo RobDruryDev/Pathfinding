@@ -23,13 +23,17 @@ public:
 
     bool IsValid(int x, int y) const { return x >= 0 && y >= 0 && x < _width && y < _height; }
 
-    template<class vecT>
-    const T& GetData(const Vector2<vecT>& pos) { return GetData(pos.x, pos.y); }
+    virtual bool IsBlocked(const Vector2I& src, const Vector2I& dst) const { return GetData(dst.x, dst.y) == 1; }
+
+    bool IsBlocked(const Vector2I&& src, const Vector2I&& dst) const { return IsBlocked(src, dst); }
 
     template<class vecT>
-    T& GetData(const Vector2<vecT>&& pos) { return GetData(pos.x, pos.y); }
+    const T& GetData(const Vector2<vecT>& pos) const { return GetData(pos.x, pos.y); }
 
-    T& GetData(int x, int y) { assert(IsValid(x, y)); return _data[x + y * _width]; }
+    template<class vecT>
+    const T& GetData(const Vector2<vecT>&& pos) const { return GetData(pos.x, pos.y); }
+
+    const T& GetData(int x, int y) const { assert(IsValid(x, y)); return _data[x + y * _width]; }
 
     template<class vecT>
     void SetData(const Vector2<vecT>& pos, T& data) { SetData(pos.x, pos.y, data); }
