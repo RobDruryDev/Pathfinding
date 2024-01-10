@@ -59,6 +59,9 @@ void Maze::Generate()
 	static _STD vector<int> open_set;
 	static _STD unordered_set<int> maze;
 
+	open_set.clear();
+	maze.clear();
+
 	FILL_RANGE(open_set, 0, _width * _height);
 	SHUFFLE(open_set, open_set.size());
 	maze.emplace(open_set[0]);

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <string>
+#include <fstream>
 #include <vector>
 #include <assert.h>
 
@@ -45,10 +48,30 @@ public:
 
     void SetData(int x, int y, T&& data) { assert(IsValid(x, y)); _data[x + y * _width] = data; }
 
+    friend _STD ofstream& operator<<(_STD ofstream& stream, Grid<T>& g)
+    {
+        stream.write(reinterpret_cast<char*>(&g._width), sizeof(g._width));
+        stream.write(reinterpret_cast<char*>(&g._height), sizeof(g._height));
+        stream.write(reinterpret_cast<char*>(g._data.data()), sizeof(T) * g._data.size());
+
+        return stream;
+    }
+
+    friend _STD istream& operator>>(_STD istream& stream, Grid<T>& g)
+    {
+        stream.read(reinterpret_cast<char*>(&g._width), sizeof(g._width));
+        stream.read(reinterpret_cast<char*>(&g._height), sizeof(g._height));
+        
+        g._data = _STD vector<T>(g._width * g._height);
+        stream.read(reinterpret_cast<char*>(g._data.data()), sizeof(T) * g._data.size());
+
+        return stream;
+    }
+
 protected:
     int _width;
     int _height;
 
-    std::vector<T> _data;
+    _STD vector<T> _data;
 };
 
