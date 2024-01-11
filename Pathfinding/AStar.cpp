@@ -50,36 +50,45 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
 
         closedSet[current.pos.x + current.pos.y * _maze->GetWidth()] = true;
 
+        static auto try_find_dest = [&](const Vector2I&& nextPos)
+        {
+            if (_maze->IsBlocked(current.pos, nextPos) || closedSet[nextPos.x + nextPos.y * _maze->GetWidth()])
+                return false;
+
+            AStarNode& neighbor = nodes[nextPos.x + nextPos.y * _maze->GetWidth()];
+            if (dest.pos == nextPos)
+            {
+                neighbor.parentPos = current.pos;
+                return true;
+            }
+
+            int neighborDist = current.distance + Distance(current.pos, nextPos);
+            int neighborCost = neighborDist + CalculateHeuristic(current, dest);
+            if (neighbor.cost > neighborCost)
+            {
+                neighbor.cost = neighborCost;
+                neighbor.distance = neighborDist;
+                neighbor.parentPos = current.pos;
+                neighbor.pos = nextPos;
+                openSet.push(neighbor);
+            }
+
+            return false;
+        };
+
         for (int i = -1; i <= 1; i++)
         {
-            if (i == 0)
-                continue;
-
-            for (int j = -1; j <= 1; j++)
+            if (try_find_dest(Vector2I(current.pos.x, current.pos.y + i)))
             {
-                if (j == 0)
-                    continue;
+                return BuildPath(startPos, destPos, nodes);
+            }
+        }
 
-                Vector2I nextPos(current.pos.x + j, current.pos.y + i);
-                if (_maze->IsBlocked(current.pos, nextPos) || closedSet[nextPos.x + nextPos.y * _maze->GetWidth()])
-                    continue;
-
-                AStarNode& neighbor = nodes[nextPos.x + nextPos.y * _maze->GetWidth()];
-                if (dest.pos == nextPos)
-                {
-                    neighbor.parentPos = current.pos;
-                    return BuildPath(startPos, destPos, nodes);
-                }
-
-                int neighborDist = current.distance + Distance(current.pos, nextPos);
-                int neighborCost = neighborDist + CalculateHeuristic(current, dest);
-                if (neighbor.cost > neighborCost)
-                {
-                    neighbor.cost = neighborCost;
-                    neighbor.distance = neighborDist;
-                    neighbor.parentPos = current.pos;
-                    openSet.push(neighbor);
-                }
+        for (int i = -1; i <= 1; i++)
+        {
+            if (try_find_dest(Vector2I(current.pos.x + i, current.pos.y)))
+            {
+                return BuildPath(startPos, destPos, nodes);
             }
         }
     }

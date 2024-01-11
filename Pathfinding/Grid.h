@@ -14,6 +14,15 @@ class Grid
 public:
     Grid(int width, int height) : _width(width), _height(height) { _data.resize(width * height); };
 
+    void Reset(int width, int height) 
+    {
+        _width = width; 
+        _height = height; 
+
+        _data.clear();
+        _data.resize(_width * _height);
+    }
+
     int GetWidth() const { return _width; }
     int GetHeight() const { return _height; }
     int GetSize() const { return _width * _height; }

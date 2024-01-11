@@ -30,6 +30,9 @@ static _STD stack<_STD pair<int, int>> debug_path;
 
 bool Maze::IsBlocked(const Vector2I& src, const Vector2I& dst) const
 {
+	if (!IsValid(src) || !IsValid(dst))
+		return true;
+
 	static const float cosFortyFive = cosf(DegToRad(45.f));
 	float angleBetween = Dot(Normalized<float>(dst - src), Vector2F::Up());
 	if (abs(angleBetween) > cosFortyFive)

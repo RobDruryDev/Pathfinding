@@ -12,9 +12,7 @@
 #include "Maze.h"
 #include "AStar.h"
 
-using namespace std;
-
-static const set<string> ExitCommands
+static const _STD set<_STD string> ExitCommands
 {
     "q",
     "quit",
@@ -22,7 +20,7 @@ static const set<string> ExitCommands
     "done"
 };
 
-static void ToLower(string& in)
+static void ToLower(_STD string& in)
 {
     for (auto& c : in)
     {
@@ -30,10 +28,28 @@ static void ToLower(string& in)
     }
 }
 
+template<class T>
+static bool TryParseXY(_STD string& input, T& x_out, T& y_out)
+{
+    bool valid = getline(_STD cin, input, ',') && isdigit(input[1]);
+    if (valid)
+    {
+        x_out = stoi(input, 0);
+    }
+
+    valid = valid && getline(_STD  cin, input) && isdigit(input[1]);
+    if (valid)
+    {
+        y_out = stoi(input, 0);
+    }
+
+    return valid;
+}
+
 constexpr int GRID_WIDTH = 15;
 constexpr int GRID_HEIGHT = 15;
 
-static string input;
+static _STD string input;
 
 int main()
 {
@@ -62,8 +78,8 @@ int main()
     }*/
 
     //static boost::timer::cpu_times last;
-    static shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
-    static unique_ptr<AStar> pathfinder(new AStar(maze));
+    static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
+    static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
     Vector2F start, dst;
 
     maze->Generate();
@@ -75,44 +91,34 @@ int main()
 
         if (input == "s")
         {
-            bool valid = getline(_STD cin, input, ',') && isdigit(input[1]);
-            if (valid)
-            {
-                start.x = stoi(input, 0);
-            }
-
-            valid = valid && getline(_STD  cin, input) && isdigit(input[1]);
-            if (valid)
-            {
-                start.y = stoi(input, 0);
-            }
+            TryParseXY(input, start.x, start.y);
         }
         else if (input == "e")
         {
             Path p;
-            bool valid = getline(_STD cin, input, ',') && isdigit(input[1]);
-            if (valid)
+            if (TryParseXY(input, dst.x, dst.y))
             {
-                dst.x = stoi(input, 0);
-            }
-
-            valid = valid && getline(_STD  cin, input) && isdigit(input[1]);
-            if (valid)
-            {
-                dst.y = stoi(input, 0);
                 p = pathfinder->FindPath(start, dst);
+                _STD cout << "Size: " << p.size() << _STD endl;
             }
+        }
+        else if (input == "size")
+        {
+            int width, height;
+            TryParseXY(input, width, height);
+            maze->Reset(width, height);
+            maze->Generate();
         }
         else if (input == "save")
         {
-            ofstream save("save.dat", _STD ios::out | _STD ios::binary);
+            _STD ofstream save("save.dat", _STD ios::out | _STD ios::binary);
             save.clear();
             save << *maze;
             save.close();
         }
         else if (input == "load")
         {
-            ifstream load("save.dat", _STD ios::in);// | _STD ios::binary);
+            _STD ifstream load("save.dat", _STD ios::in | _STD ios::binary);
             load >> *maze;
             load.close();
         }
