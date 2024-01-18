@@ -101,7 +101,8 @@ inline T Dot(const Vector2<T>& lhs, const Vector2<T>& rhs)
 template<class T>
 inline T DistanceSq(const Vector2<T>& lhs, const Vector2<T>& rhs)
 {
-    return Dot(lhs, rhs);
+    Vector2<T> toRhs = rhs - lhs;
+    return Dot(toRhs, toRhs);
 };
 
 template<class T>
@@ -113,13 +114,13 @@ inline T Distance(const Vector2<T>& lhs, const Vector2<T>& rhs)
 template<class T>
 inline T LengthSq(const Vector2<T>& vec)
 {
-    return DistanceSq(vec, vec);
+    return Dot(vec, vec);
 };
 
 template<class T>
 inline T Length(const Vector2<T>& vec)
 {
-    return Distance(vec, vec);
+    return static_cast<T>(sqrt(LengthSq(vec)));
 };
 
 template<class T>

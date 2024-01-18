@@ -20,7 +20,7 @@ Path AStar::BuildPath(const Vector2F& start, const Vector2F& dest, const vector<
         pathQueue.emplace_front(current.pos);
     }
     
-    pathQueue.emplace_front(start);
+    //pathQueue.emplace_front(start);
     return Path(pathQueue.cbegin(), pathQueue.cend());
 }
 
@@ -41,11 +41,12 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
     AStarNode& dest = nodes[destPos.x + destPos.y * _maze->GetWidth()];
     AStarNode& start = nodes[startPos.x + startPos.y * _maze->GetWidth()];
     start = { 0, 0, startPos, startPos};
+    dest.pos = destPos;
 
     openSet.push(start);
     while (!openSet.empty())
     {
-        const AStarNode& current = openSet.top();
+        const AStarNode current = openSet.top();
         openSet.pop();
 
         closedSet[current.pos.x + current.pos.y * _maze->GetWidth()] = true;
@@ -56,40 +57,46 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
                 return false;
 
             AStarNode& neighbor = nodes[nextPos.x + nextPos.y * _maze->GetWidth()];
-            if (dest.pos == nextPos)
+            neighbor.pos = nextPos;
+
+            if (dest.pos == neighbor.pos)
             {
                 neighbor.parentPos = current.pos;
                 return true;
             }
 
-            int neighborDist = current.distance + Distance(current.pos, nextPos);
-            int neighborCost = neighborDist + CalculateHeuristic(current, dest);
+            int neighborDist = current.distance + Distance(current.pos, neighbor.pos);
+            int heuristic = CalculateHeuristic(neighbor, dest);
+            int neighborCost = neighborDist + heuristic;
             if (neighbor.cost > neighborCost)
             {
                 neighbor.cost = neighborCost;
                 neighbor.distance = neighborDist;
                 neighbor.parentPos = current.pos;
-                neighbor.pos = nextPos;
                 openSet.push(neighbor);
             }
 
             return false;
         };
 
-        for (int i = -1; i <= 1; i++)
+        if (try_find_dest(Vector2I(current.pos.x, current.pos.y + 1)))
         {
-            if (try_find_dest(Vector2I(current.pos.x, current.pos.y + i)))
-            {
-                return BuildPath(startPos, destPos, nodes);
-            }
+            return BuildPath(startPos, destPos, nodes);
         }
 
-        for (int i = -1; i <= 1; i++)
+        if (try_find_dest(Vector2I(current.pos.x, current.pos.y - 1)))
         {
-            if (try_find_dest(Vector2I(current.pos.x + i, current.pos.y)))
-            {
-                return BuildPath(startPos, destPos, nodes);
-            }
+            return BuildPath(startPos, destPos, nodes);
+        }
+
+        if (try_find_dest(Vector2I(current.pos.x + 1, current.pos.y)))
+        {
+            return BuildPath(startPos, destPos, nodes);
+        }
+
+        if (try_find_dest(Vector2I(current.pos.x - 1, current.pos.y)))
+        {
+            return BuildPath(startPos, destPos, nodes);
         }
     }
 
