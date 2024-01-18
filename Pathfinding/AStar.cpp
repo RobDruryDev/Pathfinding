@@ -51,7 +51,7 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
 
         closedSet[current.pos.x + current.pos.y * _maze->GetWidth()] = true;
 
-        static auto try_find_dest = [&](const Vector2I&& nextPos)
+        static auto try_find_dest = [&](const Vector2I&& nextPos, const AStarNode& dest)
         {
             if (_maze->IsBlocked(current.pos, nextPos) || closedSet[nextPos.x + nextPos.y * _maze->GetWidth()])
                 return false;
@@ -79,22 +79,22 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
             return false;
         };
 
-        if (try_find_dest(Vector2I(current.pos.x, current.pos.y + 1)))
+        if (try_find_dest(Vector2I(current.pos.x, current.pos.y + 1), dest))
         {
             return BuildPath(startPos, destPos, nodes);
         }
 
-        if (try_find_dest(Vector2I(current.pos.x, current.pos.y - 1)))
+        if (try_find_dest(Vector2I(current.pos.x, current.pos.y - 1), dest))
         {
             return BuildPath(startPos, destPos, nodes);
         }
 
-        if (try_find_dest(Vector2I(current.pos.x + 1, current.pos.y)))
+        if (try_find_dest(Vector2I(current.pos.x + 1, current.pos.y), dest))
         {
             return BuildPath(startPos, destPos, nodes);
         }
 
-        if (try_find_dest(Vector2I(current.pos.x - 1, current.pos.y)))
+        if (try_find_dest(Vector2I(current.pos.x - 1, current.pos.y), dest))
         {
             return BuildPath(startPos, destPos, nodes);
         }
