@@ -26,7 +26,9 @@ CONTAINER.pop_back();							  \
 #define TO_IDX(VEC) VEC.x + VEC.y * _width
 #define TO_VEC(IDX) Vector2I(IDX % _width, IDX / _width)
 
-static _STD stack<_STD pair<int, int>> debug_path;
+#if _DEBUG
+static _STD stack<_STD pair<Vector2I, int>> debug_path;
+#endif
 
 bool Maze::IsBlocked(const Vector2I& src, const Vector2I& dst) const
 {
@@ -48,6 +50,10 @@ bool Maze::IsBlocked(const Vector2I& src, const Vector2I& dst) const
 
 void Maze::Generate()
 {
+#if _DEBUG
+	debug_path = _STD stack<_STD pair<Vector2I, int>>();
+#endif
+
 	_STD fill(_data.begin(), _data.end(), Maze::CLOSED_CELL);
 	static int indices[4] = { 0, 1, 2, 3 };
 	static Vector2I neighbors[4]
@@ -112,9 +118,11 @@ void Maze::Generate()
 		while (!path.empty())
 		{
 			int wall_id = path.top();
-			debug_path.emplace(_STD make_pair(current, wall_id));
+#if _DEBUG
+			debug_path.emplace(_STD make_pair(TO_VEC(current), wall_id));
+#endif
 
-			uint8_t data = GetData(TO_VEC(current)) & ~(1 << (wall_id + 2 % 4));
+			uint8_t data = GetData(TO_VEC(current)) & ~(1 << ((wall_id + 2) % 4));
 			SetData(TO_VEC(current), data);
 
 			current = TO_IDX((TO_VEC(current) - neighbors[path.top()]));
