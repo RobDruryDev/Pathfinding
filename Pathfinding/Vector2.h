@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <boost/functional/hash.hpp>
 
 template<class T>
 class Vector2
@@ -27,6 +28,20 @@ public:
     {
         x = other.x;
         y = other.y;
+    }
+};
+
+template<class T>
+class Vector2Hash
+{
+public:
+    _STD size_t operator()(const Vector2<T>& vec) const
+    {
+        _STD size_t seed = 0;
+        boost::hash_combine(seed, vec.x);
+        boost::hash_combine(seed, vec.y);
+
+        return seed;
     }
 };
 
@@ -137,3 +152,5 @@ inline void Normalize(const Vector2<T>& vec)
 
 typedef Vector2<int> Vector2I;
 typedef Vector2<float> Vector2F;
+typedef Vector2Hash<int> Vector2IHash;
+typedef Vector2Hash<float> Vector2FHash;

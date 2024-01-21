@@ -53,17 +53,17 @@ static _STD string input;
 
 int main()
 {
-    /*if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0)
     {
         cout << "SDL Init Error: " << SDL_GetError() << endl;
         return 1;
     }
 
     SDL_Window* window = SDL_CreateWindow("Pathfinding", 1280, 720,
-        SDL_WINDOW_MOUSE_GRABBED |
+        //SDL_WINDOW_MOUSE_GRABBED |
         SDL_WINDOW_INPUT_FOCUS |
         SDL_WINDOW_MOUSE_FOCUS |
-        SDL_WINDOW_KEYBOARD_GRABBED |
+        //SDL_WINDOW_KEYBOARD_GRABBED |
         SDL_WINDOW_RESIZABLE);
 
     if (!window)
@@ -75,17 +75,48 @@ int main()
     if (!renderer)
     {
         cout << "SDL Render Error: " << SDL_GetError() << endl;
-    }*/
+    }
 
     //static boost::timer::cpu_times last;
-    static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
+    /*static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
     static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
     Vector2F start, dst;
 
-    maze->Generate();
+    maze->Generate();*/
     while (ExitCommands.find(input) == ExitCommands.end())
     {
-        maze->RenderGrid();
+        SDL_Event ev;
+        if (SDL_PollEvent(&ev))
+        {
+            if (ev.type == SDL_EventType::SDL_EVENT_QUIT)
+                break;
+
+            switch (ev.type)
+            {
+                case SDL_EVENT_KEY_UP:
+                case SDL_EVENT_KEY_DOWN:
+                {
+                    SDL_KeyboardEvent* key_ev = reinterpret_cast<SDL_KeyboardEvent*>(&ev);
+                    bool toggle_full_screen = key_ev->keysym.scancode == SDL_SCANCODE_F &&
+                        (key_ev->keysym.mod & SDL_KMOD_CTRL) != 0 &&
+                        key_ev->state;
+                    if (toggle_full_screen)
+                    {
+                        SDL_SetWindowFullscreen(window, (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == 0);
+                    }
+
+                    break;
+                }
+                case SDL_EVENT_MOUSE_BUTTON_UP:
+                case SDL_EVENT_MOUSE_BUTTON_DOWN: 
+                {
+                    SDL_MouseButtonEvent* mb_ev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
+                    _STD cout << "fuck" << _STD endl;
+                    break;
+                }
+            }
+        }
+       /* maze->RenderGrid();
         _STD cout << _STD endl << "Pathfinding: ";
         _STD cin >> input;
 
@@ -125,7 +156,7 @@ int main()
         else if (input == "gen" || input == "g")
         {
             maze->Generate();
-        }
+        }*/
         /*SDL_Event ev;
         if (SDL_PollEvent(&ev))
         {
