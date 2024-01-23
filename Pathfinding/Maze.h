@@ -7,6 +7,8 @@
 /// Maybe have a "NavMesh" base calss that A* owns? or maybe 
 /// there should be a pathfinder class that owns both the data and the pathing
 /// algo. Then the pathing algo can take a data structure as a param? 
+struct SDL_Texture;
+struct SDL_Renderer;
 
 class Maze : public Grid<uint8_t>
 {
@@ -19,14 +21,19 @@ public:
 	const static uint8_t TOP_WALL = 0x8;
 	const static uint8_t CLOSED_CELL = 0xF;
 
+private:
+	SDL_Texture* _tex;
+
+public:
 	bool IsBlocked(const Vector2I& src, const Vector2I& dst) const override;
 
-private: 
+private:
+	void GenTexture(SDL_Renderer* r);
 	void RenderRow(int row, bool forceBottom);
 
 public:
 
-	void RenderGrid();
-	void Generate();
+	void RenderGrid(SDL_Renderer* r);
+	void Generate(SDL_Renderer* r);
 };
 

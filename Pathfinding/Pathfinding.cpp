@@ -51,38 +51,64 @@ constexpr int GRID_HEIGHT = 15;
 
 static _STD string input;
 
-int main()
+bool TryInitSDL(SDL_Window** w, SDL_Renderer** r, SDL_Rect* vp)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0)
     {
         cout << "SDL Init Error: " << SDL_GetError() << endl;
-        return 1;
+        return false;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Pathfinding", 1280, 720,
-        //SDL_WINDOW_MOUSE_GRABBED |
+    *w = SDL_CreateWindow("Pathfinding", 1280, 720,
         SDL_WINDOW_INPUT_FOCUS |
         SDL_WINDOW_MOUSE_FOCUS |
-        //SDL_WINDOW_KEYBOARD_GRABBED |
         SDL_WINDOW_RESIZABLE);
 
-    if (!window)
+    if (!w)
     {
         cout << "SDL Window Error: " << SDL_GetError() << endl;
+        return false;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL, 0);
-    if (!renderer)
+    SDL_RendererInfo info;
+    *r = SDL_CreateRenderer(*w, NULL, 0);
+    if (!r)
     {
         cout << "SDL Render Error: " << SDL_GetError() << endl;
+        return false;
+    }
+    else if (SDL_GetRendererInfo(*r, &info) == 0)
+    {
+        _STD cout << "Current Renderer: " << info.name << _STD endl;
     }
 
-    //static boost::timer::cpu_times last;
-    /*static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
+    if (SDL_GetRenderViewport(*r, vp))
+    {
+        _STD cout << "SDL Viewport Error: " << SDL_GetError() << _STD endl;
+        return false;
+    }
+
+    return true;
+}
+
+int main()
+{
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    SDL_Rect viewport;
+    if (!TryInitSDL(&window, &renderer, &viewport))
+    {
+        return 1;
+    }
+    
+    static boost::timer::cpu_times last;
+    static boost::timer::cpu_timer timer;
+    static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
     static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
     Vector2F start, dst;
 
-    maze->Generate();*/
+    maze->Generate(renderer);
+
     while (ExitCommands.find(input) == ExitCommands.end())
     {
         SDL_Event ev;
@@ -116,6 +142,27 @@ int main()
                 }
             }
         }
+
+        auto elapsed = timer.elapsed();
+        float dt = (elapsed.wall - last.wall) / 1000000000.f;
+        timer.resume();
+        if (dt >= 0.016f)
+        {
+            last = elapsed;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            /*SDL_RenderLine(renderer, 0.f, .5f * viewport.h, .5f * viewport.w, .5f * viewport.h);
+            SDL_RenderLine(renderer, .5f * viewport.w, .5f * viewport.h, .5f * viewport.w, .1f);*/
+            /*SDL_RenderLine(renderer, .1f, 0.f, .1f, 40.f);
+            SDL_RenderLine(renderer, .1f, 0.f, 40.1f, 0.f);
+            SDL_RenderLine(renderer, 40.1f, 0.f, 40.1f, 40.f);
+            SDL_RenderLine(renderer, 40.1f, 40.f, .1f, 40.f);*/
+            maze->RenderGrid(renderer);
+            SDL_RenderPresent(renderer);
+        }
+        timer.stop();
+
        /* maze->RenderGrid();
         _STD cout << _STD endl << "Pathfinding: ";
         _STD cin >> input;
@@ -157,20 +204,6 @@ int main()
         {
             maze->Generate();
         }*/
-        /*SDL_Event ev;
-        if (SDL_PollEvent(&ev))
-        {
-
-        }*/
-        // this isnt the way to do this.. just update dynamic characters as needed. 
-        /*auto elapsed = timer.elapsed();
-        float dt = (elapsed.wall - last.wall) / 1000000000.f;
-        timer.resume();
-        if (dt >= 0.066f)
-        {
-            last = elapsed;
-        }
-        timer.stop();*/
     }
 
     return 0;
