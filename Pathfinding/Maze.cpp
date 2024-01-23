@@ -155,7 +155,9 @@ void Maze::GenTexture(SDL_Renderer* r)
 								 tex_width, tex_height);
 	}
 
-	short* pixels = new short[tex_width * tex_height];
+	uint16_t* pixels = new uint16_t[tex_width * tex_height];
+	memset(pixels, 0, sizeof(uint16_t) * tex_width * tex_height);
+
 	for (int row = _height - 1; row >= 0; row--)
 	{
 		for (int i = 0; i < _width; ++i)
@@ -164,7 +166,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 			{
 				for (int j = 0; j < cell_size.w; ++j)
 				{
-					pixels[i + j + row * tex_width] = (short)0b1111110000000000;
+					pixels[i + j + (_height - 1 - row) * tex_width] = (uint16_t)0b1111110000000000;
 				}
 			}
 		}
@@ -177,7 +179,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 				{
 					for (int j = 0; j < cell_size.h; ++j)
 					{
-						pixels[i + (j + row) * tex_width] = (short)0b1111110000000000;
+						pixels[i + (j + _height - 1 - row) * tex_width] = (uint16_t)0b1111110000000000;
 					}
 				}
 			}
@@ -186,7 +188,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 			{
 				for (int j = 0; j < cell_size.h; ++j)
 				{
-					pixels[i + cell_size.w + (j + row) * tex_width] = (short)0b1111110000000000;
+					pixels[i + cell_size.w + (j + _height - 1 - row) * tex_width] = (uint16_t)0b1111110000000000;
 				}
 			}
 		}
@@ -197,13 +199,13 @@ void Maze::GenTexture(SDL_Renderer* r)
 			{
 				for (int j = 0; j < cell_size.w; ++j)
 				{
-					pixels[i + j + row * tex_width] = (short)0b1111110000000000;
+					pixels[i + j + (_height - 1 - row) * tex_width] = static_cast<uint16_t>(0b1111110000000000);
 				}
 			}
 		}
 	}
 
-	SDL_UpdateTexture(_tex, NULL, reinterpret_cast<void*>(&pixels), sizeof(short) * tex_width);
+	SDL_UpdateTexture(_tex, NULL, reinterpret_cast<void*>(pixels), sizeof(uint16_t) * tex_width);
 	delete[] pixels;
 }
 
