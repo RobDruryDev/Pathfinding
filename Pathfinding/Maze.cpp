@@ -31,6 +31,15 @@ CONTAINER.pop_back();							  \
 static _STD stack<_STD pair<Vector2I, int>> debug_path;
 #endif
 
+Maze::~Maze()
+{
+	if (_tex)
+	{
+		SDL_DestroyTexture(_tex);
+		_tex = nullptr;
+	}
+}
+
 bool Maze::IsBlocked(const Vector2I& src, const Vector2I& dst) const
 {
 	if (!IsValid(src) || !IsValid(dst))
@@ -149,6 +158,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 {
 	const int tex_width = _width * cell_size.w;
 	const int tex_height = _height * cell_size.h;
+
 	if (!_tex)
 	{
 		_tex = SDL_CreateTexture(r, SDL_PIXELFORMAT_ARGB1555, SDL_TEXTUREACCESS_STATIC,
@@ -166,7 +176,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 			{
 				for (int j = 0; j < cell_size.w; ++j)
 				{
-					pixels[i + j + (_height - 1 - row) * tex_width] = (uint16_t)0b1111110000000000;
+					pixels[i * cell_size.w + j + (_height - 1 - row) * cell_size.h * tex_width] = (uint16_t)0b1111110000000000;
 				}
 			}
 		}
@@ -179,7 +189,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 				{
 					for (int j = 0; j < cell_size.h; ++j)
 					{
-						pixels[i + (j + _height - 1 - row) * tex_width] = (uint16_t)0b1111110000000000;
+						pixels[i * cell_size.w + (j + (_height - 1 - row) * cell_size.h) * tex_width] = (uint16_t)0b1111110000000000;
 					}
 				}
 			}
@@ -188,7 +198,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 			{
 				for (int j = 0; j < cell_size.h; ++j)
 				{
-					pixels[i + cell_size.w + (j + _height - 1 - row) * tex_width] = (uint16_t)0b1111110000000000;
+					pixels[i * cell_size.w + cell_size.w - 1 + (j + (_height - 1 - row) * cell_size.h) * tex_width] = (uint16_t)0b1111110000000000;
 				}
 			}
 		}
@@ -199,7 +209,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 			{
 				for (int j = 0; j < cell_size.w; ++j)
 				{
-					pixels[i + j + (_height - 1 - row) * tex_width] = static_cast<uint16_t>(0b1111110000000000);
+					pixels[i * cell_size.w + j + ((_height - 1 - row) * cell_size.h + cell_size.h - 1) * tex_width] = static_cast<uint16_t>(0b1111110000000000);
 				}
 			}
 		}
@@ -209,74 +219,8 @@ void Maze::GenTexture(SDL_Renderer* r)
 	delete[] pixels;
 }
 
-void Maze::RenderRow(int row, bool forceBottom)
-{
-	for (int i = 0; i < _width; i++)
-	{
-		if (i == 0) _STD cout << " ";
-		if ((GetData(i, row) & Maze::TOP_WALL) == Maze::TOP_WALL)
-			_STD cout << "--- ";
-		else
-			_STD cout << "    ";
-	}
-
-	_STD cout << "\n";
-
-	for (int i = 0; i < _width; i++)
-	{
-		if (i == 0)
-		{
-			if ((GetData(i, row) & Maze::LEFT_WALL) == Maze::LEFT_WALL)
-				_STD cout << "|";
-			else
-				_STD cout << " ";
-		}
-
-		_STD cout << "   ";
-
-		if ((GetData(i, row) & Maze::RIGHT_WALL) == Maze::RIGHT_WALL)
-			_STD cout << "|";
-		else
-			_STD cout << " ";
-	}
-
-	_STD cout << "\n";
-
-	for (int i = 0; forceBottom && i < _width; i++)
-	{
-		if (i == 0) _STD cout << " ";
-		if ((GetData(i, row) & Maze::BOTTOM_WALL) == Maze::BOTTOM_WALL)
-			_STD cout << "--- ";
-		else
-			_STD cout << "    ";
-	}
-}
-
-
 void Maze::RenderGrid(SDL_Renderer* r)
 {
 	SDL_FRect render_rect{ 10.f, 10.f, (float)cell_size.w * _width, (float)cell_size.h * _height };
 	SDL_RenderTexture(r, _tex, NULL, &render_rect);
-	/*for (int i = _height - 1; i >= 0; i--)
-	{
-		RenderRow(i, i == 0);
-	}*/
-
-	//auto current_cell = debug_path.top();
-	//RenderChar(ToConsolePos(current_cell.first % _width, current_cell.first / _width, _height), 'o');
-	//debug_path.pop();
-
-	//while (debug_path.size() > 1)
-	//{
-	//	/*current_cell = debug_path.top();
-	//	RenderChar(ToConsolePos(current_cell.first % _width, current_cell.first / _width, _height), 
-	//			   current_cell.second % 2 == 1 ? '|' : '-');*/
-	//	debug_path.pop();
-	//}
-
-	//current_cell = debug_path.top();
-	//RenderChar(ToConsolePos(current_cell.first % _width, current_cell.first / _width, _height), 'x');
-	//debug_path.pop();
-
-	//SetCursorPos({ 0, 0 });
 }

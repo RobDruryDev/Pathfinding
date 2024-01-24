@@ -151,13 +151,7 @@ int main()
             last = elapsed;
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
-            //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-            /*SDL_RenderLine(renderer, 0.f, .5f * viewport.h, .5f * viewport.w, .5f * viewport.h);
-            SDL_RenderLine(renderer, .5f * viewport.w, .5f * viewport.h, .5f * viewport.w, .1f);*/
-            /*SDL_RenderLine(renderer, .1f, 0.f, .1f, 40.f);
-            SDL_RenderLine(renderer, .1f, 0.f, 40.1f, 0.f);
-            SDL_RenderLine(renderer, 40.1f, 0.f, 40.1f, 40.f);
-            SDL_RenderLine(renderer, 40.1f, 40.f, .1f, 40.f);*/
+
             maze->RenderGrid(renderer);
             SDL_RenderPresent(renderer);
         }

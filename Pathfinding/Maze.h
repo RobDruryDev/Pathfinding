@@ -14,6 +14,7 @@ class Maze : public Grid<uint8_t>
 {
 public:
 	using Grid::Grid;
+	~Maze();
 
 	const static uint8_t LEFT_WALL = 0x1;
 	const static uint8_t BOTTOM_WALL = 0x2;
@@ -29,7 +30,6 @@ public:
 
 private:
 	void GenTexture(SDL_Renderer* r);
-	void RenderRow(int row, bool forceBottom);
 
 public:
 
