@@ -224,3 +224,14 @@ void Maze::RenderGrid(SDL_Renderer* r)
 	SDL_FRect render_rect{ 10.f, 10.f, (float)cell_size.w * _width, (float)cell_size.h * _height };
 	SDL_RenderTexture(r, _tex, NULL, &render_rect);
 }
+
+Vector2F Maze::WindowToGridCoords(float x, float y)
+{
+	Vector2F pos
+	(
+		static_cast<int>((x - 10.f) / cell_size.w), 
+		static_cast<int>(_height - (y - 10.f) / cell_size.h)
+	);
+
+	return pos;
+}

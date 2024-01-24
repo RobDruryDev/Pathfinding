@@ -91,6 +91,12 @@ bool TryInitSDL(SDL_Window** w, SDL_Renderer** r, SDL_Rect* vp)
     return true;
 }
 
+typedef uint8_t PathState;
+constexpr PathState PATH_STATE_IDLE = 0;
+constexpr PathState PATH_STATE_HAS_START = 0x1;
+constexpr PathState PATH_STATE_HAS_END = 0x2;
+
+
 int main()
 {
     SDL_Window* window;
@@ -105,10 +111,12 @@ int main()
     static boost::timer::cpu_timer timer;
     static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
     static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
+    
+    bool ctrl_down = false;
+    PathState state = PATH_STATE_IDLE;
     Vector2F start, dst;
 
     maze->Generate(renderer);
-
     while (ExitCommands.find(input) == ExitCommands.end())
     {
         SDL_Event ev;
@@ -123,21 +131,31 @@ int main()
                 case SDL_EVENT_KEY_DOWN:
                 {
                     SDL_KeyboardEvent* key_ev = reinterpret_cast<SDL_KeyboardEvent*>(&ev);
-                    bool toggle_full_screen = key_ev->keysym.scancode == SDL_SCANCODE_F &&
-                        (key_ev->keysym.mod & SDL_KMOD_CTRL) != 0 &&
-                        key_ev->state;
-                    if (toggle_full_screen)
-                    {
-                        SDL_SetWindowFullscreen(window, (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == 0);
-                    }
-
+                    ctrl_down = (key_ev->keysym.mod & SDL_KMOD_CTRL) != 0 && key_ev->state;
                     break;
                 }
                 case SDL_EVENT_MOUSE_BUTTON_UP:
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: 
                 {
                     SDL_MouseButtonEvent* mb_ev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
-                    _STD cout << "fuck" << _STD endl;
+                    if (mb_ev->button == 1 && !mb_ev->state)
+                    {
+                        if ((state & PATH_STATE_HAS_END) != 0)
+                        {
+                            state = ctrl_down ? state & ~PATH_STATE_HAS_END : PATH_STATE_IDLE;
+                        }
+
+                        if ((state & PATH_STATE_HAS_START) != 0)
+                        {
+                            dst = maze->WindowToGridCoords(mb_ev->x, mb_ev->y);
+                            state |= maze->IsValid(dst) ? PATH_STATE_HAS_END : state;
+                        }
+                        else
+                        {
+                            start = maze->WindowToGridCoords(mb_ev->x, mb_ev->y);
+                            state |= maze->IsValid(start) ? PATH_STATE_HAS_START : state;
+                        }
+                    }
                     break;
                 }
             }
