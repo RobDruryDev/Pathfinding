@@ -12,22 +12,6 @@
 #include "Maze.h"
 #include "AStar.h"
 
-static const _STD set<_STD string> ExitCommands
-{
-    "q",
-    "quit",
-    "exit",
-    "done"
-};
-
-static void ToLower(_STD string& in)
-{
-    for (auto& c : in)
-    {
-        c = tolower(c);
-    }
-}
-
 template<class T>
 static bool TryParseXY(_STD string& input, T& x_out, T& y_out)
 {
@@ -91,11 +75,53 @@ bool TryInitSDL(SDL_Window** w, SDL_Renderer** r, SDL_Rect* vp)
     return true;
 }
 
+bool TryGenEndPointTex(SDL_Renderer* r, SDL_Texture** out_tex)
+{
+    constexpr int tex_width = 32;
+    constexpr int tex_height = 32;
+    *out_tex = SDL_CreateTexture
+    (
+        r, 
+        SDL_PIXELFORMAT_ARGB1555, 
+        SDL_TEXTUREACCESS_STATIC, 
+        tex_width, tex_height
+    );
+
+    if (!*out_tex)
+    {
+        _STD cout << "SDL Create Tex Error: " << SDL_GetError() << _STD endl;
+        return false;
+    }
+
+    SDL_SetTextureBlendMode(*out_tex, SDL_BLENDMODE_BLEND);
+
+    int left = 0, right = tex_width - 1;
+    uint16_t* pixels = new uint16_t[tex_width * tex_height];    
+    memset(pixels, 0, sizeof(uint16_t) * tex_width * tex_height);
+
+    for (int i = 0; i < tex_height; ++i)
+    {
+        pixels[left + i * tex_width] = 0b1000000000011111;
+        pixels[right + i * tex_width] = 0b1000000000011111;
+
+        ++left;
+        --right;
+    }
+
+    bool success = SDL_UpdateTexture(*out_tex, NULL, pixels, sizeof(uint16_t) * tex_width) == 0;
+    if (!success)
+    {
+        _STD cout << "SDL Update Tex Error: " << SDL_GetError() << _STD endl;
+    }
+
+    delete[] pixels;
+    return success;
+}
+
 typedef uint8_t PathState;
 constexpr PathState PATH_STATE_IDLE = 0;
 constexpr PathState PATH_STATE_HAS_START = 0x1;
 constexpr PathState PATH_STATE_HAS_END = 0x2;
-
 
 int main()
 {
@@ -103,6 +129,12 @@ int main()
     SDL_Renderer* renderer;
     SDL_Rect viewport;
     if (!TryInitSDL(&window, &renderer, &viewport))
+    {
+        return 1;
+    }
+
+    SDL_Texture* end_point_tex;
+    if (!TryGenEndPointTex(renderer, &end_point_tex))
     {
         return 1;
     }
@@ -117,7 +149,7 @@ int main()
     Vector2F start, dst;
 
     maze->Generate(renderer);
-    while (ExitCommands.find(input) == ExitCommands.end())
+    while (true)
     {
         SDL_Event ev;
         if (SDL_PollEvent(&ev))
@@ -148,12 +180,20 @@ int main()
                         if ((state & PATH_STATE_HAS_START) != 0)
                         {
                             dst = maze->WindowToGridCoords(mb_ev->x, mb_ev->y);
-                            state |= maze->IsValid(dst) ? PATH_STATE_HAS_END : state;
+                            if (maze->IsValid(dst))
+                            {
+                                state |= PATH_STATE_HAS_END;
+                                dst = maze->GridToWindowCoords(dst.x, dst.y);
+                            }
                         }
                         else
                         {
                             start = maze->WindowToGridCoords(mb_ev->x, mb_ev->y);
-                            state |= maze->IsValid(start) ? PATH_STATE_HAS_START : state;
+                            if (maze->IsValid(start))
+                            {
+                                state |= PATH_STATE_HAS_START;
+                                start = maze->GridToWindowCoords(start.x, start.y);
+                            }
                         }
                     }
                     break;
@@ -167,32 +207,30 @@ int main()
         if (dt >= 0.016f)
         {
             last = elapsed;
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
+
+            if ((state & PATH_STATE_HAS_START) != 0)
+            {
+                SDL_FRect start_rect{ start.x, start.y, 32, 32 };
+                SDL_RenderTexture(renderer, end_point_tex, NULL, &start_rect);
+            }
+
+            if ((state & PATH_STATE_HAS_END) != 0)
+            {
+                SDL_FRect dst_rect{ dst.x, dst.y, 32, 32 };
+                SDL_RenderTexture(renderer, end_point_tex, NULL, &dst_rect);
+            }
 
             maze->RenderGrid(renderer);
             SDL_RenderPresent(renderer);
         }
         timer.stop();
 
-       /* maze->RenderGrid();
+       /* 
         _STD cout << _STD endl << "Pathfinding: ";
         _STD cin >> input;
 
-        if (input == "s")
-        {
-            TryParseXY(input, start.x, start.y);
-        }
-        else if (input == "e")
-        {
-            Path p;
-            if (TryParseXY(input, dst.x, dst.y))
-            {
-                p = pathfinder->FindPath(start, dst);
-                _STD cout << "Size: " << p.size() << _STD endl;
-            }
-        }
-        else if (input == "size")
+        if (input == "size")
         {
             int width, height;
             TryParseXY(input, width, height);

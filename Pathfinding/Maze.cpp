@@ -153,7 +153,7 @@ void Maze::Generate(SDL_Renderer* r)
 	GenTexture(r);
 }
 
-constexpr SDL_Rect cell_size{ 0, 0, 40, 40 };
+constexpr SDL_Rect cell_size{ 0, 0, 32, 32 };
 void Maze::GenTexture(SDL_Renderer* r)
 {
 	const int tex_width = _width * cell_size.w;
@@ -161,9 +161,16 @@ void Maze::GenTexture(SDL_Renderer* r)
 
 	if (!_tex)
 	{
-		_tex = SDL_CreateTexture(r, SDL_PIXELFORMAT_ARGB1555, SDL_TEXTUREACCESS_STATIC,
-								 tex_width, tex_height);
+		_tex = SDL_CreateTexture
+		(
+			r, 
+			SDL_PIXELFORMAT_ARGB1555, 
+			SDL_TEXTUREACCESS_STATIC,
+			tex_width, tex_height
+		);
 	}
+
+	SDL_SetTextureBlendMode(_tex, SDL_BLENDMODE_BLEND);
 
 	uint16_t* pixels = new uint16_t[tex_width * tex_height];
 	memset(pixels, 0, sizeof(uint16_t) * tex_width * tex_height);
@@ -215,7 +222,7 @@ void Maze::GenTexture(SDL_Renderer* r)
 		}
 	}
 
-	SDL_UpdateTexture(_tex, NULL, reinterpret_cast<void*>(pixels), sizeof(uint16_t) * tex_width);
+	SDL_UpdateTexture(_tex, NULL, pixels, sizeof(uint16_t) * tex_width);
 	delete[] pixels;
 }
 
@@ -231,6 +238,17 @@ Vector2F Maze::WindowToGridCoords(float x, float y)
 	(
 		static_cast<int>((x - 10.f) / cell_size.w), 
 		static_cast<int>(_height - (y - 10.f) / cell_size.h)
+	);
+
+	return pos;
+}
+
+Vector2F Maze::GridToWindowCoords(float x, float y)
+{
+	Vector2F pos
+	(
+		static_cast<int>(x * cell_size.w + 10.f),
+		static_cast<int>((_height - y - 1) * cell_size.h + 10.f)
 	);
 
 	return pos;

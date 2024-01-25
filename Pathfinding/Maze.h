@@ -35,6 +35,7 @@ public:
 	void RenderGrid(SDL_Renderer* r);
 	void Generate(SDL_Renderer* r);
 	Vector2F WindowToGridCoords(float x, float y);
+	Vector2F GridToWindowCoords(float x, float y);
 
 };
 
