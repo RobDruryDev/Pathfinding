@@ -237,7 +237,7 @@ Vector2F Maze::WindowToGridCoords(float x, float y)
 	Vector2F pos
 	(
 		static_cast<int>((x - 10.f) / cell_size.w), 
-		static_cast<int>(_height - (y - 10.f) / cell_size.h)
+		static_cast<int>(ceil(_height - 1 - (y - 10.f) / cell_size.h))
 	);
 
 	return pos;

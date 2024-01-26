@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <set>
+#include <vector>
 #include <boost/timer/timer.hpp>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
@@ -95,11 +96,12 @@ bool TryGenEndPointTex(SDL_Renderer* r, SDL_Texture** out_tex)
 
     SDL_SetTextureBlendMode(*out_tex, SDL_BLENDMODE_BLEND);
 
-    int left = 0, right = tex_width - 1;
+    constexpr int padding = 7;
+    int left = padding, right = tex_width - padding - 1;
     uint16_t* pixels = new uint16_t[tex_width * tex_height];    
     memset(pixels, 0, sizeof(uint16_t) * tex_width * tex_height);
 
-    for (int i = 0; i < tex_height; ++i)
+    for (int i = padding; i < tex_height - padding; ++i)
     {
         pixels[left + i * tex_width] = 0b1000000000011111;
         pixels[right + i * tex_width] = 0b1000000000011111;
@@ -147,6 +149,7 @@ int main()
     bool ctrl_down = false;
     PathState state = PATH_STATE_IDLE;
     Vector2F start, dst;
+    vector<SDL_FPoint> path; 
 
     maze->Generate(renderer);
     while (true)
@@ -183,7 +186,19 @@ int main()
                             if (maze->IsValid(dst))
                             {
                                 state |= PATH_STATE_HAS_END;
+                                Path p = pathfinder->FindPath(maze->WindowToGridCoords(start.x, start.y), dst);
                                 dst = maze->GridToWindowCoords(dst.x, dst.y);
+
+                                path.clear();
+                                for (const Vector2F& coord : p)
+                                {
+                                    Vector2F win_coord = maze->GridToWindowCoords(coord.x, coord.y);
+                                    path.emplace_back(SDL_FPoint
+                                    { 
+                                        win_coord.x + 16.f, 
+                                        win_coord.y  + 16.f
+                                    });
+                                }
                             }
                         }
                         else
@@ -209,6 +224,7 @@ int main()
             last = elapsed;
             SDL_RenderClear(renderer);
 
+            maze->RenderGrid(renderer);
             if ((state & PATH_STATE_HAS_START) != 0)
             {
                 SDL_FRect start_rect{ start.x, start.y, 32, 32 };
@@ -219,9 +235,14 @@ int main()
             {
                 SDL_FRect dst_rect{ dst.x, dst.y, 32, 32 };
                 SDL_RenderTexture(renderer, end_point_tex, NULL, &dst_rect);
+                //for (const SDL_FPoint& p: path)
+                {
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                    SDL_RenderLines(renderer, path.data(), path.size());
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+                }
             }
 
-            maze->RenderGrid(renderer);
             SDL_RenderPresent(renderer);
         }
         timer.stop();
