@@ -1,6 +1,6 @@
 
 ## Project Dependencies: 
-- This project uses both SDL and Boost. If you want to download and run the project, make sure you have those libraries installed.
+- This project uses both SDL 3 and Boost 1.84. If you want to download and run the project, make sure you have those libraries installed.
 - You will also need to set up the SDL_PATH and BOOST_PATH environment variables in order for the project to link properly. 
 
 # A* Pathfinding Roadmap
