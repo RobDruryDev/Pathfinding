@@ -12,6 +12,7 @@
 #include "ConsoleUtil.h"
 #include "Maze.h"
 #include "AStar.h"
+#include "Button.h"
 
 template<class T>
 static bool TryParseXY(_STD string& input, T& x_out, T& y_out)
@@ -72,6 +73,8 @@ bool TryInitSDL(SDL_Window** w, SDL_Renderer** r, SDL_Rect* vp)
         _STD cout << "SDL Viewport Error: " << SDL_GetError() << _STD endl;
         return false;
     }
+
+    SDL_SetRenderDrawBlendMode(*r, SDL_BLENDMODE_BLEND);
 
     return true;
 }
@@ -135,6 +138,11 @@ int main()
         return 1;
     }
 
+    if (TTF_Init() != 0)
+    {
+        return 1;
+    }
+
     SDL_Texture* end_point_tex;
     if (!TryGenEndPointTex(renderer, &end_point_tex))
     {
@@ -145,6 +153,8 @@ int main()
     static boost::timer::cpu_timer timer;
     static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
     static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
+    static Button test(SDL_FRect{ 700, 50, 100, 100 }, ".\\resources\\arial.ttf", "This is a test!");
+    test.SetPadding(10, 10, 7, 7);
     
     bool ctrl_down = false;
     PathState state = PATH_STATE_IDLE;
@@ -213,6 +223,12 @@ int main()
                     }
                     break;
                 }
+                case SDL_EVENT_MOUSE_MOTION:
+                {
+                    SDL_MouseMotionEvent* mm_ev = reinterpret_cast<SDL_MouseMotionEvent*>(&ev);
+                    test.SetHovered(test.Overlaps(Vector2F{ mm_ev->x, mm_ev->y }));
+                    break;
+                }
             }
         }
 
@@ -235,14 +251,13 @@ int main()
             {
                 SDL_FRect dst_rect{ dst.x, dst.y, 32, 32 };
                 SDL_RenderTexture(renderer, end_point_tex, NULL, &dst_rect);
-                //for (const SDL_FPoint& p: path)
-                {
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                    SDL_RenderLines(renderer, path.data(), path.size());
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-                }
-            }
 
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_RenderLines(renderer, path.data(), path.size());
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+            }            
+
+            test.Render(renderer);
             SDL_RenderPresent(renderer);
         }
         timer.stop();

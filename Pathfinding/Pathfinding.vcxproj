@@ -153,11 +153,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AStar.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Maze.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AStar.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="ConsoleUtil.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Math.h" />
