@@ -18,7 +18,6 @@ private:
 	const SDL_Color TEXT_COLOR{ 255, 255, 255, 255 };
 	const SDL_Color TEXT_HOVER_COLOR{ 0, 0, 0, 255 };
 	static _STD unordered_map<size_t, _STD pair<int, TTF_Font*>> _font_map;
-	//static boost::container::flat_set<Button> _buttons;
 
 	bool _dirty, _hovered;
 	size_t _fontHash;
@@ -34,7 +33,9 @@ private:
 	
 
 public:
-	Button(const SDL_FRect& rect, _STD string&& font, _STD string&& text = "");
+	Button(SDL_FRect&& rect, _STD string&& font, _STD string&& text = "");
+	Button(const Button& other);
+
 	~Button();
 
 	void SetText(const _STD string& text)

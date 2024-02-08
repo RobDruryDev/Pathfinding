@@ -4,7 +4,22 @@
 
 _STD unordered_map<size_t, _STD pair<int, TTF_Font*>> Button::_font_map;
 
-Button::Button(const SDL_FRect& rect, _STD string&& font, _STD string&& text) : _text(text), _rect(rect), _dirty(true)
+Button::Button(const Button& other) : _dirty(true), _hovered(false)
+{
+#if _DEBUG
+	assert(_font_map.find(other._fontHash) != _font_map.end());
+	_font = other._font;
+#endif
+
+	_fontHash = other._fontHash;
+	++_font_map[_fontHash].first;
+
+	_clickEv = other._clickEv;
+	_text = other._text;
+	_rect = other._rect;
+}
+
+Button::Button(SDL_FRect&& rect, _STD string&& font, _STD string&& text) : _text(text), _rect(rect), _dirty(true), _hovered(false)
 {
 #if _DEBUG
 	_font = font;
@@ -13,7 +28,7 @@ Button::Button(const SDL_FRect& rect, _STD string&& font, _STD string&& text) : 
 	_fontHash = _STD hash<_STD string>()(font);
 	if (_font_map.find(_fontHash) == _font_map.end())
 	{
-		TTF_Font* f = TTF_OpenFont(font.c_str(), 12);
+		TTF_Font* f = TTF_OpenFont(font.c_str(), 16);
 		if (f == NULL)
 		{
 			_STD cout << TTF_GetError() << _STD endl;
@@ -47,7 +62,7 @@ Button::~Button()
 
 void Button::Render(SDL_Renderer* r)
 {
-	static SDL_FRect text_rect =
+	SDL_FRect text_rect =
 	{
 		_rect.x + _padding.x,
 		_rect.y, 0, 0

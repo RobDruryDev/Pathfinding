@@ -143,6 +143,7 @@ int main()
 
     if (TTF_Init() != 0)
     {
+        _STD cout << TTF_GetError() << _STD endl;
         return 1;
     }
 
@@ -151,19 +152,19 @@ int main()
     {
         return 1;
     }
-    
+
     SDL_RegisterEvents(LOAD_EVENT - SDL_EVENT_USER);
 
     static boost::timer::cpu_times last;
     static boost::timer::cpu_timer timer;
     static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
     static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
-    
+
     static vector<Button> buttons = vector<Button>
     {
         Button(SDL_FRect{ 700, 50, 100, 100 }, ".\\resources\\arial.ttf", "Save"),
-        Button(SDL_FRect{ 700, 75, 100, 100 }, ".\\resources\\arial.ttf", "Load"),
-        Button(SDL_FRect{ 700, 100, 100, 100 }, ".\\resources\\arial.ttf", "Generate")
+        Button(SDL_FRect{ 700, 100, 100, 100 }, ".\\resources\\arial.ttf", "Load"),
+        Button(SDL_FRect{ 700, 150, 100, 100 }, ".\\resources\\arial.ttf", "Generate")
     };
 
     buttons[0].SetPadding(10, 10, 7, 7);
@@ -172,8 +173,8 @@ int main()
     buttons[1].SetPadding(10, 10, 7, 7);
     buttons[1].SetClicEvent(LOAD_EVENT);
 
-    buttons[0].SetPadding(10, 10, 7, 7);
-    buttons[0].SetClicEvent(REGEN_EVENT);
+    buttons[2].SetPadding(10, 10, 7, 7);
+    buttons[2].SetClicEvent(REGEN_EVENT);
     
     bool ctrl_down = false;
     PathState state = PATH_STATE_IDLE;
@@ -270,13 +271,15 @@ int main()
                             break;
 
                         selected->SetHovered(false);
+                        selected = nullptr;
                     }
 
-                    for (auto button : buttons)
+                    for (int i = 0; i < buttons.size(); ++i)
                     {
-                        if (&button != selected && button.Overlaps(Vector2F{ mm_ev->x, mm_ev->y }))
+                        Button* button = &buttons[i];
+                        if (button->Overlaps(Vector2F{ mm_ev->x, mm_ev->y }))
                         {
-                            selected = &button;
+                            selected = button;
                             selected->SetHovered(true);
                         }
                     }
@@ -331,7 +334,7 @@ int main()
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
             }            
 
-            for (auto button : buttons)
+            for (auto& button : buttons)
             {
                 button.Render(renderer);
             }
