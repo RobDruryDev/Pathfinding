@@ -22,6 +22,7 @@ private:
 
 	bool _dirty, _hovered;
 	size_t _fontHash;
+	SDL_Event _clickEv;
 	_STD string _text;
 
 #if _DEBUG
@@ -65,6 +66,11 @@ public:
 		_dirty = true;
 	}
 
+	void SetClicEvent(Uint32 ev)
+	{
+		_clickEv.type = ev;
+	}
+
 	void SetHovered(bool hovered)
 	{
 		_dirty = _dirty || _hovered != hovered;
@@ -75,6 +81,11 @@ public:
 	{
 		return pos.x > _rect.x && pos.x < _rect.x + _rect.w &&
 			   pos.y > _rect.y && pos.y < _rect.y + _rect.h;
+	}
+
+	void OnClick()
+	{
+		SDL_PushEvent(&_clickEv);
 	}
 
 	void Render(SDL_Renderer* r);

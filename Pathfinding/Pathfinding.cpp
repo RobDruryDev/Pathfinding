@@ -127,6 +127,9 @@ typedef uint8_t PathState;
 constexpr PathState PATH_STATE_IDLE = 0;
 constexpr PathState PATH_STATE_HAS_START = 0x1;
 constexpr PathState PATH_STATE_HAS_END = 0x2;
+constexpr int REGEN_EVENT = SDL_EVENT_USER + 1;
+constexpr int SAVE_EVENT = SDL_EVENT_USER + 2;
+constexpr int LOAD_EVENT = SDL_EVENT_USER + 3;
 
 int main()
 {
@@ -149,12 +152,28 @@ int main()
         return 1;
     }
     
+    SDL_RegisterEvents(LOAD_EVENT - SDL_EVENT_USER);
+
     static boost::timer::cpu_times last;
     static boost::timer::cpu_timer timer;
     static _STD shared_ptr<Maze> maze(new Maze(GRID_WIDTH, GRID_HEIGHT));
     static _STD unique_ptr<AStar> pathfinder(new AStar(maze));
-    static Button test(SDL_FRect{ 700, 50, 100, 100 }, ".\\resources\\arial.ttf", "This is a test!");
-    test.SetPadding(10, 10, 7, 7);
+    
+    static vector<Button> buttons = vector<Button>
+    {
+        Button(SDL_FRect{ 700, 50, 100, 100 }, ".\\resources\\arial.ttf", "Save"),
+        Button(SDL_FRect{ 700, 75, 100, 100 }, ".\\resources\\arial.ttf", "Load"),
+        Button(SDL_FRect{ 700, 100, 100, 100 }, ".\\resources\\arial.ttf", "Generate")
+    };
+
+    buttons[0].SetPadding(10, 10, 7, 7);
+    buttons[0].SetClicEvent(SAVE_EVENT);
+
+    buttons[1].SetPadding(10, 10, 7, 7);
+    buttons[1].SetClicEvent(LOAD_EVENT);
+
+    buttons[0].SetPadding(10, 10, 7, 7);
+    buttons[0].SetClicEvent(REGEN_EVENT);
     
     bool ctrl_down = false;
     PathState state = PATH_STATE_IDLE;
@@ -162,6 +181,8 @@ int main()
     vector<SDL_FPoint> path; 
 
     maze->Generate(renderer);
+
+    Button* selected = nullptr;
     while (true)
     {
         SDL_Event ev;
@@ -183,8 +204,25 @@ int main()
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: 
                 {
                     SDL_MouseButtonEvent* mb_ev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
-                    if (mb_ev->button == 1 && !mb_ev->state)
+                    if (mb_ev->button == 1 )
                     {
+                        if (mb_ev->state)
+                        {
+                            if (selected)
+                            {
+                                //selected->SetHeld(true);
+                            }
+
+                            break;
+                        }
+
+                        if (selected)
+                        {
+                            //selected->SetHeld(false);
+                            selected->OnClick();
+                            break;
+                        }
+
                         if ((state & PATH_STATE_HAS_END) != 0)
                         {
                             state = ctrl_down ? state & ~PATH_STATE_HAS_END : PATH_STATE_IDLE;
@@ -226,7 +264,43 @@ int main()
                 case SDL_EVENT_MOUSE_MOTION:
                 {
                     SDL_MouseMotionEvent* mm_ev = reinterpret_cast<SDL_MouseMotionEvent*>(&ev);
-                    test.SetHovered(test.Overlaps(Vector2F{ mm_ev->x, mm_ev->y }));
+                    if (selected)
+                    {
+                        if (selected->Overlaps(Vector2F{ mm_ev->x, mm_ev->y }))
+                            break;
+
+                        selected->SetHovered(false);
+                    }
+
+                    for (auto button : buttons)
+                    {
+                        if (&button != selected && button.Overlaps(Vector2F{ mm_ev->x, mm_ev->y }))
+                        {
+                            selected = &button;
+                            selected->SetHovered(true);
+                        }
+                    }
+                    break;
+                }
+                case REGEN_EVENT: 
+                {
+                    maze->Generate(renderer);
+                    break;
+                }
+                case SAVE_EVENT:
+                {
+                    _STD ofstream save("save.dat", _STD ios::out | _STD ios::binary);
+                    save.clear();
+                    save << *maze;
+                    save.close();
+                    break;
+                }
+                case LOAD_EVENT:
+                {
+                    _STD ifstream load("save.dat", _STD ios::in | _STD ios::binary);
+                    load >> *maze;
+                    load.close();
+                    maze->GenTexture(renderer);
                     break;
                 }
             }
@@ -257,7 +331,11 @@ int main()
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
             }            
 
-            test.Render(renderer);
+            for (auto button : buttons)
+            {
+                button.Render(renderer);
+            }
+
             SDL_RenderPresent(renderer);
         }
         timer.stop();
