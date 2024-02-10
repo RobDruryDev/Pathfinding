@@ -62,12 +62,6 @@ Button::~Button()
 
 void Button::Render(SDL_Renderer* r)
 {
-	SDL_FRect text_rect =
-	{
-		_rect.x + _padding.x,
-		_rect.y, 0, 0
-	};
-
 	if (_dirty)
 	{
 #if _DEBUG
@@ -79,18 +73,27 @@ void Button::Render(SDL_Renderer* r)
 			_STD cout << TTF_GetError() << _STD endl;
 		}
 
-		text_rect.w = w;
-		text_rect.h = h;
-
-		// this is incorrect... the position will shift
-		_rect.y = text_rect.y - _padding.w;
-		_rect.w = w + _padding.x + _padding.y; 
-		_rect.h = h + _padding.w + _padding.h;
+		_rect.w = w;
+		_rect.h = h;
 
 		SDL_Surface* button_surf = TTF_RenderText_Blended(_font_map[_fontHash].second, _text.c_str(), _hovered ? TEXT_HOVER_COLOR : TEXT_COLOR);
 		_tex = SDL_CreateTextureFromSurface(r, button_surf);
 		_dirty = false;
 	}
+
+	SDL_FRect text_rect =
+	{
+		_rect.x + _padding.x,
+		_rect.y + _padding.w,
+		_rect.w, _rect.h
+	};
+
+	SDL_FRect button_rect =
+	{
+		_rect.x, _rect.y,
+		_rect.w + _padding.x + _padding.y,
+		_rect.h + _padding.w + _padding.h
+	};
 
 	SDL_Color initial;
 	SDL_GetRenderDrawColor(r, &initial.r, &initial.g, &initial.b, &initial.a);
@@ -98,15 +101,15 @@ void Button::Render(SDL_Renderer* r)
 	if (_hovered)
 	{
 		SDL_SetRenderDrawColor(r, HOVER_COLOR.r, HOVER_COLOR.g, HOVER_COLOR.b, HOVER_COLOR.a);
-		SDL_RenderFillRect(r, &_rect);
+		SDL_RenderFillRect(r, &button_rect);
 	}
 
 	SDL_SetRenderDrawColor(r, BORDER_COLOR.r, BORDER_COLOR.g, BORDER_COLOR.b, BORDER_COLOR.a);
 
-	SDL_RenderLine(r, _rect.x, _rect.y, _rect.x + _rect.w, _rect.y);
-	SDL_RenderLine(r, _rect.x, _rect.y, _rect.x, _rect.y + _rect.h);
-	SDL_RenderLine(r, _rect.x + _rect.w, _rect.y, _rect.x + _rect.w, _rect.y + _rect.h);
-	SDL_RenderLine(r, _rect.x, _rect.y + _rect.h, _rect.x + _rect.w, _rect.y + _rect.h);
+	SDL_RenderLine(r, button_rect.x, button_rect.y, button_rect.x + button_rect.w, _rect.y);
+	SDL_RenderLine(r, button_rect.x, button_rect.y, button_rect.x, button_rect.y + button_rect.h);
+	SDL_RenderLine(r, _rect.x + button_rect.w, button_rect.y, button_rect.x + button_rect.w, button_rect.y + button_rect.h);
+	SDL_RenderLine(r, _rect.x, button_rect.y + button_rect.h, button_rect.x + button_rect.w, button_rect.y + button_rect.h);
 
 	SDL_SetRenderDrawColor(r, initial.r, initial.g, initial.b, initial.a);
 
