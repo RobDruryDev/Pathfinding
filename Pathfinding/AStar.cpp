@@ -32,11 +32,11 @@ Path AStar::FindPath(const Vector2F& startPos, const Vector2F& destPos)
     }
 
     vector<AStarNode> nodes(_maze->GetSize());
-    std::fill(nodes.begin(), nodes.end() - 1, AStarNode::Default());
+    std::fill(nodes.begin(), nodes.end(), AStarNode::Default());
 
     vector<bool> closedSet(_maze->GetSize());
     priority_queue<AStarNode> openSet;
-    std::fill(closedSet.begin(), closedSet.end() - 1, false);
+    std::fill(closedSet.begin(), closedSet.end(), false);
 
     // Why does using the capture clause for this shit the bed? 
     AStarNode& dest = nodes[destPos.x + destPos.y * _maze->GetWidth()];

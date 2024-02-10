@@ -162,9 +162,9 @@ int main()
 
     static vector<Button> buttons = vector<Button>
     {
-        Button(SDL_FRect{ 700, 50, 100, 100 }, ".\\resources\\arial.ttf", "Save"),
-        Button(SDL_FRect{ 700, 100, 100, 100 }, ".\\resources\\arial.ttf", "Load"),
-        Button(SDL_FRect{ 700, 150, 100, 100 }, ".\\resources\\arial.ttf", "Generate")
+        Button(SDL_FRect{ 500, 10, 100, 100 }, ".\\resources\\arial.ttf", "Save"),
+        Button(SDL_FRect{ 500, 50, 100, 100 }, ".\\resources\\arial.ttf", "Load"),
+        Button(SDL_FRect{ 500, 90, 100, 100 }, ".\\resources\\arial.ttf", "Generate")
     };
 
     buttons[0].SetPadding(10, 10, 7, 7);
@@ -287,6 +287,7 @@ int main()
                 }
                 case REGEN_EVENT: 
                 {
+                    state = PATH_STATE_IDLE;
                     maze->Generate(renderer);
                     break;
                 }
@@ -300,6 +301,7 @@ int main()
                 }
                 case LOAD_EVENT:
                 {
+                    state = PATH_STATE_IDLE;
                     _STD ifstream load("save.dat", _STD ios::in | _STD ios::binary);
                     load >> *maze;
                     load.close();
